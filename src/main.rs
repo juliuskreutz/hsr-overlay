@@ -45,9 +45,9 @@ fn register_global_hotkey(visible: Arc<Mutex<bool>>) {
 }
 
 fn main() -> Result<(), eframe::Error> {
-    let p = std::env::temp_dir().join("hsr-overlay");
+    let p = std::env::temp_dir().join("hsr-overlay.lock");
 
-    let mut f = fd_lock::RwLock::new(std::fs::File::open(p).unwrap());
+    let mut f = fd_lock::RwLock::new(std::fs::File::create(p).unwrap());
     std::mem::forget(f.try_write().unwrap());
 
     let icon = eframe::IconData::try_from_png_bytes(include_bytes!("icon.png")).unwrap();
