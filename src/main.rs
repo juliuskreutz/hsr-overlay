@@ -128,6 +128,8 @@ impl eframe::App for AchievementTracker {
         frame.set_visible(visible);
 
         if visible {
+            frame.focus();
+
             if self.authenticated {
                 ctx.memory_mut(|m| m.stop_text_input());
 
@@ -207,8 +209,8 @@ impl eframe::App for AchievementTracker {
                     egui::ScrollArea::new([false, true])
                         .auto_shrink([false, true])
                         .show(ui, |ui| {
-                            for (i, achievement) in achievements.iter_mut().enumerate() {
-                                ui.horizontal(|ui| {
+                            ui.vertical_centered_justified(|ui| {
+                                for (i, achievement) in achievements.iter_mut().enumerate() {
                                     let text = achievement.name.clone()
                                         + if achievement.completed {
                                             " ✅"
@@ -243,8 +245,8 @@ impl eframe::App for AchievementTracker {
                                     if label.clicked() {
                                         toggle_achievement(achievement, &self.client);
                                     }
-                                });
-                            }
+                                }
+                            });
                         })
                 });
             } else {
