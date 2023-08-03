@@ -181,6 +181,7 @@ impl eframe::App for AchievementTracker {
                         })
                         .collect();
 
+                    let mut scroll = false;
                     let events = ui.input(|i| i.events.clone()); // avoid dead-lock by cloning. TODO(emilk): optimize
                     for event in &events {
                         match event {
@@ -206,6 +207,8 @@ impl eframe::App for AchievementTracker {
                             } => {
                                 self.cursor =
                                     self.cursor.saturating_add(1).min(achievements.len() - 1);
+
+                                scroll = true;
                             }
                             egui::Event::Key {
                                 key: egui::Key::ArrowUp,
@@ -219,6 +222,8 @@ impl eframe::App for AchievementTracker {
                                 ..
                             } => {
                                 self.cursor = self.cursor.saturating_sub(1);
+
+                                scroll = true;
                             }
                             egui::Event::Key {
                                 key: egui::Key::Enter,
@@ -267,7 +272,10 @@ impl eframe::App for AchievementTracker {
                                         );
 
                                         label.request_focus();
-                                        ui.scroll_to_rect(label.rect, None);
+
+                                        if scroll {
+                                            ui.scroll_to_rect(label.rect, None);
+                                        }
 
                                         label
                                     } else {
