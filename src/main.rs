@@ -45,6 +45,11 @@ fn register_global_hotkey(visible: Arc<Mutex<bool>>) {
 }
 
 fn main() -> Result<(), eframe::Error> {
+    let p = std::env::temp_dir().join("hsr-overlay");
+
+    let mut f = fd_lock::RwLock::new(std::fs::File::open(p).unwrap());
+    std::mem::forget(f.try_write().unwrap());
+
     let options = eframe::NativeOptions {
         always_on_top: true,
         decorated: false,
@@ -238,7 +243,12 @@ impl eframe::App for AchievementTracker {
                                         ui.label(&text)
                                     };
 
-                                    if label.hovered() && ctx.input(|i| i.pointer.is_moving()) {
+                                    if label.hovered()
+                                        && ctx.input(|i| {
+                                            i.pointer.is_moving()
+                                                || i.scroll_delta != egui::vec2(0.0, 0.0)
+                                        })
+                                    {
                                         self.cursor = i;
                                     }
 
