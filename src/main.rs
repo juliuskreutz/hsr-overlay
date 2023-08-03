@@ -238,7 +238,7 @@ impl eframe::App for AchievementTracker {
                                         ui.label(&text)
                                     };
 
-                                    if label.hovered() {
+                                    if label.hovered() && ctx.input(|i| i.pointer.is_moving()) {
                                         self.cursor = i;
                                     }
 
