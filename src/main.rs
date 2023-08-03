@@ -50,12 +50,15 @@ fn main() -> Result<(), eframe::Error> {
     let mut f = fd_lock::RwLock::new(std::fs::File::open(p).unwrap());
     std::mem::forget(f.try_write().unwrap());
 
+    let icon = eframe::IconData::try_from_png_bytes(include_bytes!("icon.png")).unwrap();
+
     let options = eframe::NativeOptions {
         always_on_top: true,
         decorated: false,
         centered: true,
         follow_system_theme: false,
         initial_window_size: Some(egui::vec2(400.0, 500.0)),
+        icon_data: Some(icon),
         ..Default::default()
     };
 
