@@ -4,6 +4,7 @@ use std::{
     ptr,
     sync::{Arc, Mutex},
     thread,
+    time::Duration,
 };
 
 use eframe::egui;
@@ -14,7 +15,9 @@ use winapi::um::winuser::{
     PM_REMOVE, WM_HOTKEY,
 };
 
-fn register_global_hotkey(visible: Arc<Mutex<bool>>) {
+type Callback = Arc<Mutex<Box<dyn Fn() + Send>>>;
+
+fn register_global_hotkey(toggle: Arc<Mutex<bool>>, callback: Callback) {
     unsafe {
         RegisterHotKey(ptr::null_mut(), 1, (MOD_WIN | MOD_SHIFT) as u32, 'A' as u32);
 
@@ -35,11 +38,15 @@ fn register_global_hotkey(visible: Arc<Mutex<bool>>) {
                 DispatchMessageW(&msg);
 
                 if msg.message == WM_HOTKEY {
-                    let mut lock = visible.lock().unwrap();
+                    let mut lock = toggle.lock().unwrap();
+
+                    callback.lock().unwrap()();
 
                     *lock = !*lock;
                 }
             }
+
+            thread::sleep(Duration::from_millis(100));
         }
     }
 }
@@ -78,7 +85,9 @@ struct Achievement {
 }
 
 struct AchievementTracker {
-    visible: Arc<Mutex<bool>>,
+    toggle: Arc<Mutex<bool>>,
+    callback: Callback,
+    visible: bool,
     search: String,
     cursor: usize,
     client: reqwest::blocking::Client,
@@ -90,12 +99,14 @@ struct AchievementTracker {
 
 impl Default for AchievementTracker {
     fn default() -> Self {
-        let visible = Arc::new(Mutex::new(true));
+        let toggle = Arc::new(Mutex::new(false));
+        let callback: Callback = Arc::new(Mutex::new(Box::new(|| {})));
 
         {
-            let visible = visible.clone();
+            let toggle = toggle.clone();
+            let callback = callback.clone();
             thread::spawn(move || {
-                register_global_hotkey(visible);
+                register_global_hotkey(toggle, callback);
             });
         }
 
@@ -112,7 +123,9 @@ impl Default for AchievementTracker {
             .unwrap();
 
         Self {
-            visible,
+            toggle,
+            callback,
+            visible: true,
             search: String::new(),
             cursor: 0,
             client,
@@ -131,11 +144,26 @@ impl eframe::App for AchievementTracker {
             return;
         }
 
-        let visible = *self.visible.lock().unwrap();
+        {
+            let ctx = ctx.clone();
+            *self.callback.lock().unwrap() = Box::new(move || {
+                ctx.request_repaint();
+            });
+        }
 
-        frame.set_visible(visible);
+        let mut lock = self.toggle.lock().unwrap();
+        if *lock {
+            *lock = false;
 
-        if visible {
+            self.visible = !self.visible;
+
+            self.search.clear();
+            self.cursor = 0;
+        }
+
+        frame.set_visible(self.visible);
+
+        if self.visible {
             frame.focus();
 
             if self.authenticated {
@@ -306,13 +334,6 @@ impl eframe::App for AchievementTracker {
                 });
             }
         }
-
-        if !visible {
-            self.search.clear();
-            self.cursor = 0;
-        }
-
-        ctx.request_repaint();
     }
 }
 
