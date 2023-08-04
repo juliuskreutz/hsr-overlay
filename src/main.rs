@@ -178,6 +178,8 @@ impl eframe::App for AchievementTracker {
             self.incomplete = false;
 
             self.cursor = 0;
+
+            frame.focus();
         }
 
         frame.set_visible(self.visible);
