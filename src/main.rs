@@ -186,7 +186,8 @@ impl eframe::App for AchievementTracker {
             frame.focus();
 
             let panel_frame = egui::Frame {
-                fill: egui::Color32::from_rgba_premultiplied(12, 12, 12, 220),
+                fill: egui::Color32::from_rgba_premultiplied(12, 12, 12, 230),
+                inner_margin: egui::Margin::same(10.0),
                 ..egui::Frame::default()
             };
 
