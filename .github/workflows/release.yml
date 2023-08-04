@@ -1,10 +1,15 @@
-name: Build
+name: Release
 
-on: [push, workflow_dispatch]
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+permissions: write-all
 
 jobs:
-  build:
-    name: Build
+  release:
+    name: Release
     runs-on: windows-latest
     steps:
       - name: Checkout Source Code
@@ -21,8 +26,8 @@ jobs:
           command: build
           args: --release
 
-      - name: Upload Artifact
-        uses: actions/upload-artifact@v2
+      - name: Release
+        uses: softprops/action-gh-release@v1
         with:
-          name: hsr-overlay
-          path: target/release/hsr-overlay.exe
+          name: Release
+          files: target/release/hsr-overlay.exe

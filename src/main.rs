@@ -186,7 +186,8 @@ impl eframe::App for AchievementTracker {
             frame.focus();
 
             let panel_frame = egui::Frame {
-                fill: egui::Color32::from_rgba_premultiplied(12, 12, 12, 220),
+                fill: egui::Color32::from_rgba_premultiplied(12, 12, 12, 230),
+                inner_margin: egui::Margin::same(10.0),
                 ..egui::Frame::default()
             };
 
@@ -196,7 +197,9 @@ impl eframe::App for AchievementTracker {
                 egui::CentralPanel::default()
                     .frame(panel_frame)
                     .show(ctx, |ui| {
-                        ui.heading(format!("Hi {}", self.username));
+                        let h = ui.heading(format!("Hi {}", self.username));
+                        h.request_focus();
+                        ctx.memory_mut(|m| m.lock_focus(h.id, true));
 
                         let achievements: Vec<i64> = self
                             .achievement_ids
@@ -316,7 +319,7 @@ impl eframe::App for AchievementTracker {
                                                 .sense(egui::Sense::click()),
                                             );
 
-                                            label.request_focus();
+                                            // label.request_focus();
 
                                             if scroll {
                                                 ui.scroll_to_rect(label.rect, None);
