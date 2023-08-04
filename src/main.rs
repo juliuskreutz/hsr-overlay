@@ -61,7 +61,7 @@ fn main() -> Result<(), eframe::Error> {
 
     let options = eframe::NativeOptions {
         always_on_top: true,
-        decorated: true,
+        decorated: false,
         centered: true,
         follow_system_theme: false,
         initial_window_size: Some(egui::vec2(400.0, 500.0)),
