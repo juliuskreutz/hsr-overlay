@@ -61,7 +61,7 @@ fn main() -> Result<(), eframe::Error> {
 
     let options = eframe::NativeOptions {
         always_on_top: true,
-        decorated: false,
+        decorated: true,
         centered: true,
         follow_system_theme: false,
         initial_window_size: Some(egui::vec2(400.0, 500.0)),
@@ -183,8 +183,6 @@ impl eframe::App for AchievementTracker {
         frame.set_visible(self.visible);
 
         if self.visible {
-            frame.focus();
-
             let panel_frame = egui::Frame {
                 fill: egui::Color32::from_rgba_premultiplied(12, 12, 12, 230),
                 inner_margin: egui::Margin::same(10.0),
